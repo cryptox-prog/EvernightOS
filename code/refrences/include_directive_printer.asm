@@ -16,4 +16,4 @@ print_looper:
     JMP print_looper
 
 print_complete:
-    RET
+    RET								; RET is used in conjuction wit CALL to return to the last return address on the stack
