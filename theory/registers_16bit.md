@@ -1,5 +1,7 @@
+# 16 Bit Registers
 In assembly, we utilize the registers present in the CPU directly to perform arithmetic operations, data manipulation, etc.
 
+## General Purpose Registers
 The registers used for general operations are:
 - **AX** - Accumulator Register, primary accumulator for arithmetic and logic operations.
 - **BX** - Base Register, used to store the base address (the base address of an array would be the pointer to its first element).
@@ -17,7 +19,7 @@ Other general-purpose registers are:
 
 These registers store pointers. Since we are in 16-bit real mode, we have up to 2^16 possible memory addresses. Thus, to be able to access them in their entirety, these registers are not divided into two.
 
-**Segment Registers:**
+## Segment Registers
 - **CS** - Code Segment, holds the base address to where instructions are stored. To modify this register, 'far jumps' or 'calls' are used; it can't be altered directly.
 - **DS** - Data Segment, points to the base address of where the data is stored.
 - **ES** - Generally used as a second Data Segment.
@@ -30,3 +32,6 @@ This is correct:
 MOV AX, 0
 MOV ES, AX
 ```
+## Refrences
+- [8086 16 Bit Registers](https://www.geeksforgeeks.org/types-of-registers-in-8086-microprocessor/)
+- [General Purpose Registers](https://www.geeksforgeeks.org/general-purpose-registers-8086-microprocessor/)
