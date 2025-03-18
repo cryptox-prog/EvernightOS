@@ -35,3 +35,6 @@ MOV ES, AX
 ## Refrences
 - [8086 16 Bit Registers](https://www.geeksforgeeks.org/types-of-registers-in-8086-microprocessor/)
 - [General Purpose Registers](https://www.geeksforgeeks.org/general-purpose-registers-8086-microprocessor/)
+- 32 Bit Registers
+    - [What are they?](https://www.reddit.com/r/Assembly_language/comments/1855gmj/what_does_edxecxebx_or_eax_mean_in_assembly/)
+    - [Using 32 Bit Registers in Real Mode](https://stackoverflow.com/questions/6917503/is-it-possible-to-use-32-bits-registers-instructions-in-real-mode)
