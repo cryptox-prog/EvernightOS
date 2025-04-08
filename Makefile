@@ -17,7 +17,8 @@ ASSEMBLER_FLAGS_ELF = -f elf32
 C_COMPILER_FLAGS = -m32 -ffreestanding -nostdlib -fno-stack-protector
 OBJ_COPY_FLAGS = -O binary
 LINKER_FLAGS = -m elf_i386
-EMULATOR_FLAGS = -drive # FLAG: -monitor stdio THEN type infor registers
+EMULATOR_FLAGS = -drive
+EMULATOR_DEBUG_FLAGS = -monitor stdio # then type info refegisters
 
 # Source Files
 BOOT_SOURCE = $(SRC_DIR)/bootloader.asm
@@ -103,6 +104,9 @@ _run:
 		echo "$(EMULATOR) $(EMULATOR_FLAGS) format=raw,file=$(TARGET)"; \
 		$(EMULATOR) $(EMULATOR_FLAGS) format=raw,file=$(TARGET); \
 	fi
+
+debug:
+	$(EMULATOR) $(EMULATOR_FLAGS) format=raw,file=$(TARGET) $(EMULATOR_DEBUG_FLAGS)
 
 # Clean Targets
 clean:
