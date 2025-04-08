@@ -23,7 +23,7 @@ EMULATOR_DEBUG_FLAGS = -monitor stdio # then type info refegisters
 # Source Files
 BOOT_SOURCE = $(SRC_DIR)/bootloader.asm
 GDT_SOURCE = $(SRC_DIR)/gdt.asm
-START_PROTECTED_SOURCE = $(SRC_DIR)/start32.asm
+START_PROTECTED_SOURCE = $(SRC_DIR)/start_protected.asm
 KERNEL_MAIN_SOURCE = $(SRC_DIR)/kernel.c
 IDT_SOURCE = $(SRC_DIR)/idt.c
 ISR_SOURCE = $(SRC_DIR)/isr.asm
@@ -34,7 +34,7 @@ TYPES_HEADER = $(SRC_DIR)/types.h
 
 # Intermediate Files
 BOOT_BINARY =  $(INTERMEDIATE_DIR)/bootloader.bin
-START_PROTECTED_OBJECT = $(INTERMEDIATE_DIR)/start32.o
+START_PROTECTED_OBJECT = $(INTERMEDIATE_DIR)/start_protected.o
 KERNEL_MAIN_OBJECT = $(INTERMEDIATE_DIR)/kernel.o
 IDT_OBJECT = $(INTERMEDIATE_DIR)/idt.o
 ISR_OBJECT = $(INTERMEDIATE_DIR)/isr.o
