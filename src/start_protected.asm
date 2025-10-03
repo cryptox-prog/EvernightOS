@@ -1,7 +1,7 @@
 [BITS 32]
 
 section .data
-; Define the data segment selector (as set in your GDT)
+; Define the data segment selector (see src/gdt.asm)
 %DEFINE data_segment 0x10
 
 section .text
@@ -17,7 +17,7 @@ _start:
     MOV GS, AX
     MOV SS, AX
 
-    ; Set up a stack pointer (choose an address above your code/data; adjust as needed)
+    ; Set up a stack pointer (choosing an address above code/data; adjust as needed)
     MOV esp, 0x90000
 
     ; Call the C kernel entry point (kernel_main)

@@ -1,6 +1,6 @@
 # Global Descriptor Table (GDT)
 
-The Global Descriptor Table (GDT) is used as a reference to define the permissions and abilities of certain sections of memory have in protected mode. It is necessary to use a GDT because allowing all software applications on the system access to all portions of memory is unsafe.
+The Global Descriptor Table (GDT) is used as a reference to define the permissions and abilities of certain sections of memory in protected mode. It is necessary to use a GDT because allowing all software applications on the system access to all portions of memory is unsafe.
 
 ## Segments in GDT
 

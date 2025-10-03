@@ -12,7 +12,7 @@
 ; 5. Granularity and Upper 4-bits of Limit
 ; 6. Upper 8-bits of Base Address
 ; 
-; GOTO theory/gloabal_descriptor_table for a more detailed explaination
+; GOTO docs/global_descriptor_table for a more detailed explaination
 ;----------------------
 [BITS 16]
 
@@ -28,6 +28,7 @@ gdt_start:
     DB 0xcf                                 ; limit in units of pages, operand size 32 bit
     DB 0
 
+    ; Data Segment
     DW 0xffff
     DW 0
     DB 0
@@ -35,6 +36,7 @@ gdt_start:
     DB 0xcf                                 ; same as above
     DB 0
 
+; This tag acts as a marker for the end of the GDT, then used to calculate the size of the GDT
 gdt_end:
 
 gdt_descriptor:
