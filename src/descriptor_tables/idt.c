@@ -1,17 +1,17 @@
-#include "idt.h"
+#include "descriptor_tables/idt.h"
 
 InterruptDescriptor32 idt[IDT_SIZE];
 
 extern void isr_0x20(void);
 
-/// @brief Essentialy a constructor for the InterruptDescriptor32
+/// @brief Essentially a constructor for the InterruptDescriptor32
 /// @param vector_number The entry number in the table
 /// @param isr_address The 32-bit number containing both the offset_1 and offset_2
 /// @param selector The pointer to the code segment as described in the gdt
-/// @param type_attr Set privelages
+/// @param type_attr Set privileges
 void set_idt_entry(uint8_t vector_number, uint32_t isr_address, uint16_t selector, uint8_t type_attr) {
     /*
-    * Extracting two 16 bit numbers from a 32 bit number:
+    * Extracting two 16-bit numbers from a 32-bit number:
     *
     * 0x1234ABCD = 00010010001101001010101111001101
     *           &  00000000000000001111111111111111
@@ -30,7 +30,6 @@ void set_idt_entry(uint8_t vector_number, uint32_t isr_address, uint16_t selecto
 }
 
 /// @brief Initialize all the IDT entries
-/// @param None 
 void init_idt(void) {
     for (uint16_t i = 0; i < IDT_SIZE; i++) {
         // For each interrupt vector, set a default entry.
@@ -44,7 +43,6 @@ void init_idt(void) {
 static IDT_Descriptor idtr;
 
 /// @brief Write the IDT into the LIDT register
-/// @param None
 void write_idt(void) {
     idtr.limit = (uint16_t)((sizeof(InterruptDescriptor32) * IDT_SIZE) - 1); // Count starts from 0 so '-1'
     idtr.base = (uint32_t)&idt;
@@ -52,6 +50,6 @@ void write_idt(void) {
     // Inline assembly to load the IDT using the lidt instruction
     // volatile to prevent any compiler optimizations
     // __asm__ could have been asm doesn't matter for newer versions of C
-    // m is a directive to make for essentialy lidt [idtr]
+    // m is a directive to make for essentially lidt [idtr]
     __asm__ volatile ("lidt %0" : : "m"(idtr));
 }

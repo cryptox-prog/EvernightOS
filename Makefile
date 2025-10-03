@@ -1,5 +1,8 @@
 # Directories
 SRC_DIR = src
+BOOTLOADER_DIR = $(SRC_DIR)/bootloader
+UTILS_DIR = $(SRC_DIR)/utils
+DESCRIPTOR_TABLES_DIR = $(SRC_DIR)/descriptor_tables
 BUILD_DIR = build
 INTERMEDIATE_DIR = $(BUILD_DIR)/inter
 
@@ -12,27 +15,27 @@ IMAGE_MAKER = dd
 EMULATOR = qemu-system-i386
 
 # Flags
-ASSEMBLER_FLAGS_BINARY = -f bin -I src/
+ASSEMBLER_FLAGS_BINARY = -f bin -I $(SRC_DIR)
 ASSEMBLER_FLAGS_ELF = -f elf32
-C_COMPILER_FLAGS = -m32 -ffreestanding -g -nostdlib -fno-stack-protector -O0 -fno-omit-frame-pointer -ffunction-sections -fdata-sections -Wall -Wextra
+C_COMPILER_FLAGS = -m32 -ffreestanding -g -nostdlib -fno-stack-protector -O0 -fno-omit-frame-pointer -Wall -Wextra -I $(SRC_DIR)
 OBJ_COPY_FLAGS = -O binary
 LINKER_FLAGS = -m elf_i386
 EMULATOR_FLAGS = -drive
 EMULATOR_DEBUG_FLAGS = -s -S -monitor stdio # then type info registers
 
 # Source Files
-BOOT_SOURCE = $(SRC_DIR)/bootloader.asm
-GDT_SOURCE = $(SRC_DIR)/gdt.asm
-START_PROTECTED_SOURCE = $(SRC_DIR)/start_protected.asm
+BOOT_SOURCE = $(BOOTLOADER_DIR)/bootloader.asm
+GDT_SOURCE = $(DESCRIPTOR_TABLES_DIR)/gdt.asm
+START_PROTECTED_SOURCE = $(BOOTLOADER_DIR)/start_protected.asm
 KERNEL_MAIN_SOURCE = $(SRC_DIR)/kernel.c
-IDT_SOURCE = $(SRC_DIR)/idt.c
-ISR_SOURCE = $(SRC_DIR)/isr.asm
+IDT_SOURCE = $(DESCRIPTOR_TABLES_DIR)/idt.c
+ISR_SOURCE = $(DESCRIPTOR_TABLES_DIR)/isr.asm
 LINKER_SOURCE = linker.ld
 
 # Include Files
-TYPES_HEADER = $(SRC_DIR)/types.h
-IDT_HEADER = $(SRC_DIR)/idt.h
-IO_HEADER = $(SRC_DIR)/io.h
+TYPES_HEADER = $(UTILS_DIR)/types.h
+IDT_HEADER = $(DESCRIPTOR_TABLES_DIR)/idt.h
+IO_HEADER = $(UTILS_DIR)/io.h
 
 # Intermediate Files
 BOOT_BINARY =  $(INTERMEDIATE_DIR)/bootloader.bin

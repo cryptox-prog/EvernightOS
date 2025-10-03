@@ -47,7 +47,7 @@ start:
     JMP code_segment:second_stage_addr
 
 
-%include "gdt.asm"
+%include "descriptor_tables/gdt.asm"
 
 disk_error:
     JMP disk_error

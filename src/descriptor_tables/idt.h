@@ -1,7 +1,7 @@
 #ifndef IDT_H
 #define IDT_H
 
-#include "types.h"
+#include "utils/types.h"
 
 #define IDT_SIZE 256
 

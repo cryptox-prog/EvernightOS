@@ -1,4 +1,4 @@
-# voltAbitOS
+# EvernightOS
 
 ## Overview
 - The aim of this project is design a basic 32-bit operating system from scratch using only assembly and C

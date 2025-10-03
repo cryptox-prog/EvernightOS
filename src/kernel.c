@@ -1,6 +1,9 @@
-#include "types.h"
-#include "idt.h"
-#include "io.h"
+#include "utils/types.h"
+#include "descriptor_tables/idt.h"
+#include "utils/io.h"
+
+#define VGA_WIDTH 80
+#define VGA_HEIGHT 25
 
 void set_cursor_position(uint16_t row, uint16_t col);
 void clear_screen(void);
@@ -10,8 +13,8 @@ void kernel_main(void) {
 
     clear_screen();
 
-    //outb(0x3D4, 0x01);
-    //uint8_t width = inb(0x3D5) + 1;
+    outb(0x3D4, 0x01);
+    uint8_t width = inb(0x3D5) + 1;
 
     set_cursor_position(10, 30);
 
