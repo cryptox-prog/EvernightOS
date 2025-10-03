@@ -18,7 +18,7 @@ start:
     MOV BX, second_stage_addr               ; BX = 0x1000 (destination address)
 
     MOV AH, 0x02                            ; BIOS function: Read sectors
-    MOV AL, 1                               ; Number of sectors to read (Check the size of the second_stage binary file (NOT ELF)
+    MOV AL, 0x02                            ; Number of sectors to read (Check the size of the second_stage binary file (NOT ELF)
     MOV CH, 0                               ; Cylinder 0
     MOV CL, 2                               ; Start at sector 2 (sector 1 is our bootloader)
     MOV DH, 0                               ; Head 0
