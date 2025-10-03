@@ -14,11 +14,11 @@ EMULATOR = qemu-system-i386
 # Flags
 ASSEMBLER_FLAGS_BINARY = -f bin -I src/
 ASSEMBLER_FLAGS_ELF = -f elf32
-C_COMPILER_FLAGS = -m32 -ffreestanding -nostdlib -fno-stack-protector
+C_COMPILER_FLAGS = -m32 -ffreestanding -g -nostdlib -fno-stack-protector -O0 -fno-omit-frame-pointer -ffunction-sections -fdata-sections -Wall -Wextra
 OBJ_COPY_FLAGS = -O binary
 LINKER_FLAGS = -m elf_i386
 EMULATOR_FLAGS = -drive
-EMULATOR_DEBUG_FLAGS = -monitor stdio # then type info refegisters
+EMULATOR_DEBUG_FLAGS = -s -S -monitor stdio # then type info registers
 
 # Source Files
 BOOT_SOURCE = $(SRC_DIR)/bootloader.asm
@@ -31,6 +31,8 @@ LINKER_SOURCE = linker.ld
 
 # Include Files
 TYPES_HEADER = $(SRC_DIR)/types.h
+IDT_HEADER = $(SRC_DIR)/idt.h
+IO_HEADER = $(SRC_DIR)/io.h
 
 # Intermediate Files
 BOOT_BINARY =  $(INTERMEDIATE_DIR)/bootloader.bin
@@ -45,7 +47,7 @@ SECOND_STAGE_BINARY = $(INTERMEDIATE_DIR)/second_stage.bin
 TARGET = $(BUILD_DIR)/disk.img
 
 # Phony Targets
-.PHONY: all run _run clean _clean
+.PHONY: prepare all run _run clean _clean debug gdb
 
 # Main Build Target
 all: prepare $(TARGET)
@@ -74,14 +76,14 @@ $(START_PROTECTED_OBJECT): $(START_PROTECTED_SOURCE) $(IDT_OBJECT)
 	$(ASSEMBLER) $(ASSEMBLER_FLAGS_ELF) $(START_PROTECTED_SOURCE) -o $(START_PROTECTED_OBJECT)
 
 # Build IDT and ISR
-$(IDT_OBJECT): $(IDT_SOURCE) $(ISR_OBJECT) $(TYPES_HEADER)
+$(IDT_OBJECT): $(IDT_SOURCE) $(ISR_OBJECT) $(TYPES_HEADER) $(IDT_HEADER)
 	$(C_COMPILER) $(C_COMPILER_FLAGS) -c $(IDT_SOURCE) -o $(IDT_OBJECT)
 
 $(ISR_OBJECT): $(ISR_SOURCE)
 	$(ASSEMBLER) $(ASSEMBLER_FLAGS_ELF) $(ISR_SOURCE) -o $(ISR_OBJECT)
 
 # Build Kernel
-$(KERNEL_MAIN_OBJECT): $(KERNEL_MAIN_SOURCE) $(TYPES_HEADER)
+$(KERNEL_MAIN_OBJECT): $(KERNEL_MAIN_SOURCE) $(TYPES_HEADER) $(IO_HEADER)
 	$(C_COMPILER) $(C_COMPILER_FLAGS) -c $(KERNEL_MAIN_SOURCE) -o $(KERNEL_MAIN_OBJECT)
 
 # Link Second Stage
@@ -91,6 +93,7 @@ $(SECOND_STAGE_LINKED): $(LINKER_SOURCE) $(START_PROTECTED_OBJECT) $(KERNEL_MAIN
 # Convert Second Stage to Binary
 $(SECOND_STAGE_BINARY): $(SECOND_STAGE_LINKED)
 	$(OBJ_COPY) $(OBJ_COPY_FLAGS) $(SECOND_STAGE_LINKED) $(SECOND_STAGE_BINARY)
+	truncate -s %512 $(SECOND_STAGE_BINARY)
 
 # Run Emulator
 run: all
@@ -105,8 +108,11 @@ _run:
 		$(EMULATOR) $(EMULATOR_FLAGS) format=raw,file=$(TARGET); \
 	fi
 
-debug:
+debug: all
 	$(EMULATOR) $(EMULATOR_FLAGS) format=raw,file=$(TARGET) $(EMULATOR_DEBUG_FLAGS)
+
+gdb:
+	gdb -ex "target remote localhost:1234" -ex "symbol-file $(SECOND_STAGE_LINKED)"
 
 # Clean Targets
 clean:
