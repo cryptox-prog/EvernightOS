@@ -16,7 +16,7 @@ Due to the above issues modern operating systems work in protected mode. It solv
 Since, computers still start in real mode, a switch needs to performed to protected mode.
 The basic steps to do this are:
 - Disabling interrupts
-- Enabling the `A20` line, is needed to be able to access more than 1MB of memory
+- Enabling the `A20` line, is needed to be able to access more than 1MB of memory (see ports.md)
 - Loading the `GDT` into the `lgdt` register
 - Setting the `LSB` of the `cr0` register to 1
 - Then finally performing a far jump to the code segment selector
