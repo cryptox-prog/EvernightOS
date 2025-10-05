@@ -1,5 +1,5 @@
-#ifndef IO_H
-#define IO_H
+#ifndef PORTS_H
+#define PORTS_H
 
 #include "utils/types.h"
 
@@ -29,4 +29,4 @@ static inline uint8_t inb(uint16_t port) {
     return ret;
 }
 
-#endif // IO_H
+#endif // PORTS_H

@@ -1,5 +1,5 @@
 #include "display/vga.h"
-#include "utils/io.h"
+#include "utils/ports.h"
 
 uint32_t get_vga_linear_idx(uint32_t row, uint32_t col) {
 	return (row * VGA_WIDTH + col) * 2; // multiplied by 2 since each VGA cell has 2 bytes
