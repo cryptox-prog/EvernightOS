@@ -21,19 +21,19 @@ gdt_start:
     TIMES 8 DB 0
     
     ; Code Segment
-    DW 0xffff
+    DW lsb16limit
     DW 0
     DB 0
-    DB 0x9e                                 ; Executable, ring0, conforming, present
-    DB 0xcf                                 ; limit in units of pages, operand size 32 bit
+    DB present_ring0_code_executable_conforming_readable
+    DB paging_32operands_32code_limit4msb
     DB 0
 
     ; Data Segment
-    DW 0xffff
+    DW lsb16limit
     DW 0
     DB 0
-    DB 0x92                                 ; Non Executable, ring0, non conforming, present
-    DB 0xcf                                 ; same as above
+    DB present_ring0_data_unexecutable_nonconforming_readable
+    DB paging_32operands_32code_limit4msb
     DB 0
 
 ; This tag acts as a marker for the end of the GDT, then used to calculate the size of the GDT
@@ -46,3 +46,8 @@ gdt_descriptor:
 ; EQU lets us assign cosntant values to a symbol (works like include the exact value replaces the symbok upon assembly of code
 code_segment EQU 0x08                       ; Starts after the 8 bits (0 - 7) of the null segment
 data_segment EQU 0x10                       ; starts after the 16 bits (0 - 15) of the code and null segment
+
+lsb16limit EQU 0xffff
+present_ring0_code_executable_conforming_readable EQU 0x9e
+present_ring0_data_unexecutable_nonconforming_readable EQU 0x92
+paging_32operands_32code_limit4msb EQU 0xcf
