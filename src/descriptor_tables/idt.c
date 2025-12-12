@@ -1,8 +1,10 @@
 #include "descriptor_tables/idt.h"
+#include "utils/ports.h"
 
 InterruptDescriptor32 idt[IDT_SIZE];
 
-extern void isr_0x20(void);
+extern void default_isr(void);
+extern void isr_keyboard(void);
 
 /// @brief Essentially a constructor for the InterruptDescriptor32
 /// @param vector_number The entry number in the table
@@ -35,9 +37,20 @@ void init_idt(void) {
         // For each interrupt vector, set a default entry.
         // Selector 0x08: typical kernel code segment selector.
         // Type attribute 0x8E: present, DPL=0, 32-bit interrupt gate.
-        set_idt_entry(i, (uint32_t)isr_0x20, 0x08, 0x8E);
+        set_idt_entry(i, (uint32_t)default_isr, 0x08, 0x8E);
     }
-    write_idt(); // Load the IDT into the CPU's IDTR register
+    set_idt_entry(0x21, (uint32_t)isr_keyboard, 0x08, 0x8E);
+
+    PIC_remap(0x20, 0x28);
+
+    // 4) Write IDT now that PIC vectors are established
+    write_idt();
+
+    // 5) Unmask IRQ1 (keyboard) on master PIC
+    IRQ_clear_mask(1); // unmask keyboard IRQ (IRQ1)
+    IRQ_set_mask(0); // mask timer IRQ (IRQ0)
+
+    __asm__ volatile ("sti"); // Enable interrupts
 }
 
 static IDT_Descriptor idtr;
@@ -53,3 +66,65 @@ void write_idt(void) {
     // m is a directive to make for essentially lidt [idtr]
     __asm__ volatile ("lidt %0" : : "m"(idtr));
 }
+
+
+/*
+arguments:
+	offset1 - vector offset for master PIC
+		vectors on the master become offset1..offset1+7
+	offset2 - same for slave PIC: offset2..offset2+7
+*/
+void PIC_remap(int offset1, int offset2)
+{
+	outb(PIC1_COMMAND, ICW1_INIT | ICW1_ICW4);  // starts the initialization sequence (in cascade mode)
+	io_wait();
+	outb(PIC2_COMMAND, ICW1_INIT | ICW1_ICW4);
+	io_wait();
+	outb(PIC1_DATA, offset1);                 // ICW2: Master PIC vector offset
+	io_wait();
+	outb(PIC2_DATA, offset2);                 // ICW2: Slave PIC vector offset
+	io_wait();
+	outb(PIC1_DATA, 1 << CASCADE_IRQ);        // ICW3: tell Master PIC that there is a slave PIC at IRQ2
+	io_wait();
+	outb(PIC2_DATA, 2);                       // ICW3: tell Slave PIC its cascade identity (0000 0010)
+	io_wait();
+	
+	outb(PIC1_DATA, ICW4_8086);               // ICW4: have the PICs use 8086 mode (and not 8080 mode)
+	io_wait();
+	outb(PIC2_DATA, ICW4_8086);
+	io_wait();
+
+	// Unmask both PICs.
+	outb(PIC1_DATA, 0x00);
+	outb(PIC2_DATA, 0x00);
+}
+
+void IRQ_set_mask(uint8_t IRQline) {
+    uint16_t port;
+    uint8_t value;
+
+    if(IRQline < 8) {
+        port = PIC1_DATA;
+    } else {
+        port = PIC2_DATA;
+        IRQline -= 8;
+    }
+    value = inb(port) | (1 << IRQline);
+    outb(port, value);        
+}
+
+void IRQ_clear_mask(uint8_t IRQline) {
+    uint16_t port;
+    uint8_t value;
+
+    if(IRQline < 8) {
+        port = PIC1_DATA;
+    } else {
+        port = PIC2_DATA;
+        IRQline -= 8;
+    }
+    value = inb(port) & ~(1 << IRQline);
+    outb(port, value);        
+}
+
+

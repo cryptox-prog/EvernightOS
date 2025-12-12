@@ -21,8 +21,8 @@ ASSEMBLER_FLAGS_ELF = -f elf32
 C_COMPILER_FLAGS = -m32 -ffreestanding -g -nostdlib -fno-stack-protector -O0 -fno-omit-frame-pointer -Wall -Wextra -I $(SRC_DIR)
 OBJ_COPY_FLAGS = -O binary
 LINKER_FLAGS = -m elf_i386
-EMULATOR_FLAGS = -drive
-EMULATOR_DEBUG_FLAGS = -s -S -monitor stdio # then type info registers
+EMULATOR_FLAGS = -m 512 -vga std -device i8042
+EMULATOR_DEBUG_FLAGS = -s -S #-monitor stdio # then type info registers
 
 # Source Files
 BOOT_SOURCE = $(BOOTLOADER_DIR)/bootloader.asm
@@ -111,19 +111,19 @@ $(SECOND_STAGE_BINARY): $(SECOND_STAGE_LINKED)
 
 # Run Emulator
 run: all
-	$(EMULATOR) $(EMULATOR_FLAGS) format=raw,file=$(TARGET)
+	$(EMULATOR) -drive format=raw,file=$(TARGET) $(EMULATOR_FLAGS)
 
 _run:
 	@if [ ! -f "$(TARGET)" ]; then \
 		echo "Error: $(TARGET) does not exist."; \
 		exit 1; \
 	else \
-		echo "$(EMULATOR) $(EMULATOR_FLAGS) format=raw,file=$(TARGET)"; \
-		$(EMULATOR) $(EMULATOR_FLAGS) format=raw,file=$(TARGET); \
+		echo "$(EMULATOR) -drive format=raw,file=$(TARGET)"; \
+		$(EMULATOR) -drive format=raw,file=$(TARGET); \
 	fi
 
 debug: all
-	$(EMULATOR) $(EMULATOR_FLAGS) format=raw,file=$(TARGET) $(EMULATOR_DEBUG_FLAGS)
+	$(EMULATOR) -drive format=raw,file=$(TARGET) $(EMULATOR_FLAGS) $(EMULATOR_DEBUG_FLAGS)
 
 gdb:
 	gdb -ex "target remote localhost:1234" -ex "symbol-file $(SECOND_STAGE_LINKED)"

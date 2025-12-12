@@ -3,6 +3,16 @@
 
 #include "utils/types.h"
 
+
+/*
+asm ( "assembly template"
+      : output operands
+      : input operands
+      : clobbers
+      : goto labels
+);
+*/
+
 /// @brief Output a byte to a port
 /// @param port The port to write to
 /// @param val The value to write
@@ -27,6 +37,13 @@ static inline uint8_t inb(uint16_t port) {
                      : "Nd"(port)
                      : "memory");
     return ret;
+}
+
+
+static inline void io_wait(void) {
+    // Write to an unused I/O port (0x80 is traditional).
+    // It takes a small amount of time to complete, acting as a delay.
+    outb(0x80, 0);
 }
 
 #endif // PORTS_H

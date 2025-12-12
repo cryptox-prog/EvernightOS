@@ -11,15 +11,12 @@ void set_cursor_position(uint16_t row, uint16_t col) {
 	uint16_t cursor_location_lower_byte_register_idx = 0x0f;
 	uint16_t cursor_location_high_byte_register_idx = 0x0e;
 
-	uint8_t get_lower_8_bit_mask = 0xff;
+	uint16_t get_lower_8_bit_mask = 0x00ff;
 	uint16_t right_shift_to_get_higher_8_bits = 8;
 
-
-	// Send the low byte
 	outb(CRTC_ADDRESS_PORT, cursor_location_lower_byte_register_idx);
 	outb(CRTC_DATA_PORT, pos & get_lower_8_bit_mask);
 
-	// Send the high byte
 	outb(CRTC_ADDRESS_PORT, cursor_location_high_byte_register_idx);
 	outb(CRTC_DATA_PORT, (pos >> right_shift_to_get_higher_8_bits) & get_lower_8_bit_mask);
 }

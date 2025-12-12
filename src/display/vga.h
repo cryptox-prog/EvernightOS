@@ -7,8 +7,8 @@
 #define VGA_WIDTH ((uint32_t)80)
 #define VGA_HEIGHT ((uint32_t)25)
 
-#define CRTC_ADDRESS_PORT ((uint16_t)0x3D4)
-#define CRTC_DATA_PORT ((uint16_t)0x3D5)
+#define CRTC_ADDRESS_PORT ((uint16_t)0x3d4)
+#define CRTC_DATA_PORT ((uint16_t)0x3d5)
 
 typedef enum {
     VGA_COLOR_BLACK        = 0,

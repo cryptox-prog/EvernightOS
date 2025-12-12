@@ -7,7 +7,7 @@ void kernel_main(void) {
     display_welcome_screen();
 
     // Trigger the ISR by generating a software interrupt (vector 0x20)
-    //__asm__ volatile ("int $0x20");
+    //__asm__ volatile ("int $0x21");
 
     while (1);
 }
