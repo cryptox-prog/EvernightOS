@@ -7,6 +7,7 @@ section .data
 section .text
     global _start                           ; Entry point for the second stage
     extern kernel_main                      ; The C function to be called
+    extern __bss_start, __bss_end
 
 _start:
     ; Set up flat segmentation (DS, ES, FS, GS, and SS all point to data_segment)
@@ -19,6 +20,14 @@ _start:
 
     ; Set up a stack pointer (choosing an address above code/data; adjust as needed)
     MOV esp, 0x90000
+
+    ; Raw disk loading does not initialize C's zero-initialized storage.
+    CLD
+    XOR EAX, EAX
+    MOV EDI, __bss_start
+    MOV ECX, __bss_end
+    SUB ECX, EDI
+    REP STOSB
 
     ; Call the C kernel entry point (kernel_main)
     CALL kernel_main
