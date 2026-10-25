@@ -126,7 +126,7 @@ debug: all
 	$(EMULATOR) -drive format=raw,file=$(TARGET) $(EMULATOR_FLAGS) $(EMULATOR_DEBUG_FLAGS)
 
 gdb:
-	gdb -ex "target remote localhost:1234" -ex "symbol-file $(SECOND_STAGE_LINKED)"
+	gdb $(SECOND_STAGE_LINKED) -ex "target remote localhost:1234"
 
 # Clean Targets
 clean:
