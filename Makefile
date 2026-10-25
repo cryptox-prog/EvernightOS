@@ -21,7 +21,7 @@ ASSEMBLER_FLAGS_ELF = -f elf32
 C_COMPILER_FLAGS = -m32 -ffreestanding -g -nostdlib -fno-stack-protector -O0 -fno-omit-frame-pointer -Wall -Wextra -I $(SRC_DIR)
 OBJ_COPY_FLAGS = -O binary
 LINKER_FLAGS = -m elf_i386
-EMULATOR_FLAGS = -m 512 -vga std -device i8042
+EMULATOR_FLAGS = -m 512 -vga std
 EMULATOR_DEBUG_FLAGS = -s -S #-monitor stdio # then type info registers
 
 # Source Files
