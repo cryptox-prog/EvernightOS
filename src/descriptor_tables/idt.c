@@ -1,5 +1,6 @@
 #include "descriptor_tables/idt.h"
 #include "utils/ports.h"
+#include <stdint.h>
 
 InterruptDescriptor32 idt[IDT_SIZE];
 
@@ -10,28 +11,17 @@ extern void isr_keyboard(void);
 /// @param vector_number The entry number in the table
 /// @param isr_address The 32-bit number containing both the offset_1 and offset_2
 /// @param selector The pointer to the code segment as described in the gdt
-/// @param type_attr Set privileges
-void set_idt_entry(uint8_t vector_number, uint32_t isr_address, uint16_t selector, uint8_t type_attr) {
-    /*
-    * Extracting two 16-bit numbers from a 32-bit number:
-    *
-    * 0x1234ABCD = 00010010001101001010101111001101
-    *           &  00000000000000001111111111111111
-    *              --------------------------------
-    *              00000000000000001010101111001101 = 0xABCD
-    * 
-    * upper16 = value >> 16
-    *         = 0xCAFEBABE >> 16
-    *         = 0x0000CAFE
-    */
-    idt[vector_number].offset_1 = isr_address & 0xFFFF;            // Lower 16 bits of the address
-    idt[vector_number].selector = selector;                        // Code segment selector
-    idt[vector_number].zero = 0;                                   // This field is always 0
-    idt[vector_number].type_attributes = type_attr;                // Set the type and attributes
-    idt[vector_number].offset_2 = (isr_address >> 16);             // Upper 16 bits of the address
+/// @param type_attr Set privileges using types and attributes
+void set_idt_entry(uint8_t vector_number, uint32_t isr_address, uint16_t code_segment_selector, uint8_t type_attr) {
+    idt[vector_number].offset_1 = get_lower_16(isr_address);
+    idt[vector_number].selector = code_segment_selector;
+    idt[vector_number].zero = 0; // This field is always 0 by convention
+    idt[vector_number].type_attributes = type_attr;
+    idt[vector_number].offset_2 = get_upper_16(isr_address);
 }
 
 /// @brief Initialize all the IDT entries
+/// @note Does not enable interrupts
 void init_idt(void) {
     for (uint16_t i = 0; i < IDT_SIZE; i++) {
         // For each interrupt vector, set a default entry.
@@ -41,16 +31,10 @@ void init_idt(void) {
     }
     set_idt_entry(0x21, (uint32_t)isr_keyboard, 0x08, 0x8E);
 
-    PIC_remap(0x20, 0x28);
-
-    // 4) Write IDT now that PIC vectors are established
+    pic_remap();
     write_idt();
-
-    // 5) Unmask IRQ1 (keyboard) on master PIC
-    IRQ_clear_mask(1); // unmask keyboard IRQ (IRQ1)
-    IRQ_set_mask(0); // mask timer IRQ (IRQ0)
-
-    __asm__ volatile ("sti"); // Enable interrupts
+    
+    irq_clear_mask(IRQ_LINE_KEYBOARD);
 }
 
 static IDT_Descriptor idtr;
@@ -67,64 +51,55 @@ void write_idt(void) {
     __asm__ volatile ("lidt %0" : : "m"(idtr));
 }
 
+/// @brief Remap the master and slave pic for given offsets (offset + IRQ<x>)
+/// @note by vector it simply means that they are a form of index
+void pic_remap(void) {
+    // Start Initialization
+    uint8_t ICW1 = ICW1_INIT | ICW1_CASCADE_MODE | ICW1_USE_TRIGGER_EDGE | ICW1_EXPECT_ICW4;
+	write_to_port(PIC_MASTER_COMMAND_PORT, ICW1);
+	io_wait();
+	write_to_port(PIC_SLAVE_COMMAND_PORT, ICW1);
+	io_wait();
 
-/*
-arguments:
-	offset1 - vector offset for master PIC
-		vectors on the master become offset1..offset1+7
-	offset2 - same for slave PIC: offset2..offset2+7
-*/
-void PIC_remap(int offset1, int offset2)
-{
-	outb(PIC1_COMMAND, ICW1_INIT | ICW1_ICW4);  // starts the initialization sequence (in cascade mode)
+    // Set Offset
+	write_to_port(PIC_MASTER_DATA_PORT, ICW2_OFFSET_MASTER);
 	io_wait();
-	outb(PIC2_COMMAND, ICW1_INIT | ICW1_ICW4);
+	write_to_port(PIC_SLAVE_DATA_PORT, ICW2_OFFSET_SLAVE);
 	io_wait();
-	outb(PIC1_DATA, offset1);                 // ICW2: Master PIC vector offset
+
+    // Define the cascade order
+	write_to_port(PIC_MASTER_DATA_PORT, ICW3_SLAVE_AT_IRQ_MASK);
 	io_wait();
-	outb(PIC2_DATA, offset2);                 // ICW2: Slave PIC vector offset
-	io_wait();
-	outb(PIC1_DATA, 1 << CASCADE_IRQ);        // ICW3: tell Master PIC that there is a slave PIC at IRQ2
-	io_wait();
-	outb(PIC2_DATA, 2);                       // ICW3: tell Slave PIC its cascade identity (0000 0010)
+	write_to_port(PIC_SLAVE_DATA_PORT, ICW3_MASTER_IRQ_FOR_SLAVE_VALUE);
 	io_wait();
 	
-	outb(PIC1_DATA, ICW4_8086);               // ICW4: have the PICs use 8086 mode (and not 8080 mode)
+    // Change to 8086 mode
+    uint8_t ICW4 = ICW4_USE_8086_MODE | ICW4_ISR_END_MANUAL | ICW4_BUFFER_NO | ICW4_MULTI_NESTING_NO;
+	write_to_port(PIC_MASTER_DATA_PORT, ICW4);
 	io_wait();
-	outb(PIC2_DATA, ICW4_8086);
+	write_to_port(PIC_SLAVE_DATA_PORT, ICW4);
 	io_wait();
 
-	// Unmask both PICs.
-	outb(PIC1_DATA, 0x00);
-	outb(PIC2_DATA, 0x00);
+	// Mask both PIC
+	write_to_port(PIC_MASTER_DATA_PORT, 0xff);
+	write_to_port(PIC_SLAVE_DATA_PORT, 0xff);
 }
 
-void IRQ_set_mask(uint8_t IRQline) {
-    uint16_t port;
-    uint8_t value;
-
-    if(IRQline < 8) {
-        port = PIC1_DATA;
-    } else {
-        port = PIC2_DATA;
-        IRQline -= 8;
-    }
-    value = inb(port) | (1 << IRQline);
-    outb(port, value);        
+/// @brief Disable a IRQ line
+/// @param irq_line The IRQ line to disable
+void irq_set_mask(uint8_t irq_line) {
+    uint16_t port = pick_pic_data_port(irq_line);
+    uint8_t value = read_from_port(port) | IRQ_ONE_HOT_ENCODE(irq_line);
+    write_to_port(port, value);
 }
 
-void IRQ_clear_mask(uint8_t IRQline) {
-    uint16_t port;
-    uint8_t value;
+/// @brief Enable a IRQ line
+/// @param irq_line The IRQ line to enable
+void irq_clear_mask(uint8_t irq_line) {
+    uint16_t port = pick_pic_data_port(irq_line);
+    uint8_t value = read_from_port(port) & ~IRQ_ONE_HOT_ENCODE(irq_line);
 
-    if(IRQline < 8) {
-        port = PIC1_DATA;
-    } else {
-        port = PIC2_DATA;
-        IRQline -= 8;
-    }
-    value = inb(port) & ~(1 << IRQline);
-    outb(port, value);        
+    write_to_port(port, value);        
 }
 
 

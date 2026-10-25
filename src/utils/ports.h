@@ -13,11 +13,11 @@ asm ( "assembly template"
 );
 */
 
-/// @brief Output a byte to a port
+/// @brief Write one byte to an I/O port
 /// @param port The port to write to
 /// @param val The value to write
 /// @cite https://wiki.osdev.org/Inline_Assembly/Examples#I/O_access
-static inline void outb(uint16_t port, uint8_t val) {
+static inline void write_to_port(uint16_t port, uint8_t val) {
     __asm__ volatile("outb %b0, %w1" : : "a"(val), "Nd"(port) : "memory");
     /* There's an outb %al, $imm8 encoding, for compile-time constant port numbers that fit in 8b. (N constraint).
      * Wider immediate constants would be truncated at assemble-time (e.g. "i" constraint).
@@ -26,11 +26,11 @@ static inline void outb(uint16_t port, uint8_t val) {
      * */
 }
 
-/// @brief Input a byte from a port
+/// @brief Read one byte from an I/O port
 /// @param port The port to read from
 /// @return The byte read from the port
 /// @cite https://wiki.osdev.org/Inline_Assembly/Examples#I/O_access
-static inline uint8_t inb(uint16_t port) {
+static inline uint8_t read_from_port(uint16_t port) {
     uint8_t ret;
     __asm__ volatile("inb %w1, %b0"
                      : "=a"(ret)
@@ -43,7 +43,7 @@ static inline uint8_t inb(uint16_t port) {
 static inline void io_wait(void) {
     // Write to an unused I/O port (0x80 is traditional).
     // It takes a small amount of time to complete, acting as a delay.
-    outb(0x80, 0);
+    write_to_port(0x80, 0);
 }
 
 #endif // PORTS_H
