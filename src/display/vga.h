@@ -41,7 +41,7 @@ void set_cursor_position(uint16_t row, uint16_t col);
 void clear_screen(void);
 
 void display_char_col_offset(uint8_t c, uint32_t* row, uint32_t* col, uint8_t color, uint32_t col_offset);
-void display_string_col_offset(const string_t* str, uint32_t* row, uint32_t* col, uint8_t color, uint32_t col_offset);
-void display_string(const string_t* str, uint32_t* row, uint32_t* col, uint8_t color);
+void display_string_col_offset(const char* str, uint32_t length, uint32_t* row, uint32_t* col, uint8_t color, uint32_t col_offset);
+void display_string(const char* str, uint32_t length, uint32_t* row, uint32_t* col, uint8_t color);
 
 #endif // VGA_H

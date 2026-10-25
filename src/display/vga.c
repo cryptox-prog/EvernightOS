@@ -46,10 +46,10 @@ void display_char_col_offset(uint8_t c, uint32_t* row, uint32_t* col, uint8_t co
 	(*col)++;
 }
 
-void display_string_col_offset(const string_t* str, uint32_t* row, uint32_t* col, uint8_t color, uint32_t col_offset) {
+void display_string_col_offset(const char* str, uint32_t length, uint32_t* row, uint32_t* col, uint8_t color, uint32_t col_offset) {
 	*col += col_offset;
-	for (uint32_t i = 0; i < str->length; i++) {
-        char c = str->str[i];
+	for (uint32_t i = 0; i < length; i++) {
+        char c = str[i];
         if (c == '\n') {
             (*row)++;
             (*col) = col_offset;
@@ -62,6 +62,6 @@ void display_string_col_offset(const string_t* str, uint32_t* row, uint32_t* col
     }
 }
 
-void display_string(const string_t* str, uint32_t* row, uint32_t* col, uint8_t color) {
-    display_string_col_offset(str, row, col, color, 0);
+void display_string(const char* str, uint32_t length, uint32_t* row, uint32_t* col, uint8_t color) {
+    display_string_col_offset(str, length, row, col, color, 0);
 }

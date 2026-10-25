@@ -11,7 +11,7 @@ static inline void display_welcome_screen(void) {
 	uint32_t evernight_logo_row_offset = 2;
 	uint32_t evernight_logo_col_offset = 19;
 
-	string_t evernight_logo = create_string("\
+	static const char evernight_logo[] = "\
                    *\n\
                    **\n\
            ***     **     **\n\
@@ -30,7 +30,7 @@ static inline void display_welcome_screen(void) {
             ** *****  ***\n\
             *   ****  **  **\n\
                   ****\n\
-                   *\n");
+                   *\n";
 
 
     uint8_t vga_red_on_black = vga_color_encode(VGA_COLOR_RED, VGA_COLOR_BLACK);
@@ -38,7 +38,7 @@ static inline void display_welcome_screen(void) {
 
 	clear_screen();
 	curr_vga_row += evernight_logo_row_offset;
-	display_string_col_offset(&evernight_logo, &curr_vga_row, &curr_vga_col, vga_red_on_black, evernight_logo_col_offset); // red on black
+	display_string_col_offset(evernight_logo, sizeof(evernight_logo) - 1, &curr_vga_row, &curr_vga_col, vga_red_on_black, evernight_logo_col_offset); // red on black
 
     // Top border
     curr_vga_row = 0; curr_vga_col = 0;
@@ -61,14 +61,14 @@ static inline void display_welcome_screen(void) {
     }
 
     // Overwrite with footer
-    string_t footer = create_string(" Welcome to EvernightOS ");
+    static const char footer[] = " Welcome to EvernightOS ";
     curr_vga_row = VGA_HEIGHT - 1; curr_vga_col = 0;
-    display_string_col_offset(&footer, &curr_vga_row, &curr_vga_col, vga_black_on_red, (VGA_WIDTH - footer.length) / 2);
+    display_string_col_offset(footer, sizeof(footer) - 1, &curr_vga_row, &curr_vga_col, vga_black_on_red, (VGA_WIDTH - (sizeof(footer) - 1)) / 2);
 
     // Overwrite with press enter
-    string_t press_key = create_string(" Press Enter key to continue... ");
+    static const char press_key[] = " Press Enter key to continue... ";
     curr_vga_row = 0; curr_vga_col = 0;
-    display_string_col_offset(&press_key, &curr_vga_row, &curr_vga_col, vga_red_on_black, (VGA_WIDTH - press_key.length) / 2);
+    display_string_col_offset(press_key, sizeof(press_key) - 1, &curr_vga_row, &curr_vga_col, vga_red_on_black, (VGA_WIDTH - (sizeof(press_key) - 1)) / 2);
 
     set_cursor_position(curr_vga_row, curr_vga_col);
 }
