@@ -3,6 +3,15 @@
 
 start:
     CLI                                     ; Clear Interrupts, to prevent interference during important ececution of important instructions
+    JMP 0x0000:real_mode_start
+
+real_mode_start:
+    XOR AX, AX
+    MOV DS, AX
+    MOV ES, AX
+    MOV SS, AX
+    MOV SP, 0x7c00
+    CLD
 
     ; Enable A20 line via port 0x92. A20 line is activate because we need to access more than 1MB of memory
     ; TODO: Look at better implementations
@@ -29,7 +38,7 @@ start:
     ; Making segments 0
     XOR AX, AX
     MOV DS, AX
-    MOV CS, AX
+    ; CS is loaded by the far jump below; MOV to CS is an invalid opcode.
 
     lgdt [gdt_descriptor]
 
