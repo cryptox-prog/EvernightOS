@@ -32,11 +32,20 @@ static inline void write_to_port(uint16_t port, uint8_t val) {
 /// @cite https://wiki.osdev.org/Inline_Assembly/Examples#I/O_access
 static inline uint8_t read_from_port(uint16_t port) {
     uint8_t ret;
-    __asm__ volatile("inb %w1, %b0"
-                     : "=a"(ret)
-                     : "Nd"(port)
-                     : "memory");
+    __asm__ volatile("inb %w1, %b0" : "=a"(ret) : "Nd"(port) : "memory");
     return ret;
+}
+
+/// @brief Write one 16-bit word to an I/O port
+static inline void write_word_to_port(uint16_t port, uint16_t value) {
+    __asm__ volatile("outw %w0, %w1" : : "a"(value), "Nd"(port) : "memory");
+}
+
+/// @brief Read one 16-bit word from an I/O port
+static inline uint16_t read_word_from_port(uint16_t port) {
+    uint16_t value;
+    __asm__ volatile("inw %w1, %w0" : "=a"(value) : "Nd"(port) : "memory");
+    return value;
 }
 
 
