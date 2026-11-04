@@ -18,10 +18,10 @@ _start:
     MOV GS, AX
     MOV SS, AX
 
-    ; Set up a stack pointer (choosing an address above code/data; adjust as needed)
+    ; Set up a stack pointer (choosing an address above code/data)
     MOV esp, 0x90000
 
-    ; Raw disk loading does not initialize C's zero-initialized storage.
+    ; Raw disk loading does not initialize zero non init vars of C
     CLD
     XOR EAX, EAX
     MOV EDI, __bss_start

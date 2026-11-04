@@ -23,6 +23,7 @@ Next let us take the example of VGA. This is Video Graphics Array, we will be co
 There are more ports in VGA, but they are beyond the scope of this document.
 
 ## References
+
 - [A20](https://wiki.osdev.org/A20_Line)
 - [VGA](https://wiki.osdev.org/VGA_Hardware#Port_0x3C4,%5C_0x3CE,%5C_0x3D4)
 
